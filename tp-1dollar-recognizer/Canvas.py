@@ -90,7 +90,6 @@ class Canvas(QWidget):
         # Weight should be within [0,1]
         # self.feedback = interpolate(x1, y1, x2, x2, weight)
 
-
         self.counter += 1
         self.repaint()
 

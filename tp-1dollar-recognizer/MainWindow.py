@@ -47,6 +47,12 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget( self.container )
 
+        d = pickle.load(open('./onedol_ds.pkl', 'rb'))
+        data = d['dataset']
+        labels = d['labels']
+        for i in range(len(data)):
+            self.add_template_thumbnail(data[i], labels[i])
+
         ################################
         # TODO 9: connect the signal and the slot
         ###############################
@@ -83,7 +89,7 @@ class MainWindow(QMainWindow):
         gallery.setFixedHeight(150)
         gallery.setViewMode(QListView.IconMode)
         gallery.setUniformItemSizes(True)
-        gallery.setIconSize(QSize(50,50))
+        gallery.setIconSize(QSize(50, 50))
         return gallery
 
 
@@ -100,6 +106,8 @@ class MainWindow(QMainWindow):
         icon = QIcon(pix)
 
         #todo 3 create and add the corresponding item in the gallery
+        self.gallery.addItem(QListWidgetItem(icon, str(label)))
+
 
 
     #######################
