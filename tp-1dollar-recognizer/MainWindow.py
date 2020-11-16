@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from gdrawer import GDrawer
 from Canvas import Canvas
+from onedollar import OneDollar
 
 import pickle
 
@@ -47,11 +48,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget( self.container )
 
-        d = pickle.load(open('./onedol_ds.pkl', 'rb'))
-        data = d['dataset']
-        labels = d['labels']
-        for i in range(len(data)):
-            self.add_template_thumbnail(data[i], labels[i])
+        self.oneDollar = OneDollar()
 
         ################################
         # TODO 9: connect the signal and the slot
@@ -66,16 +63,17 @@ class MainWindow(QMainWindow):
         name = ["Triangle", "X", "Rectangle", "Circle", "Check", "Caret", "Question", "Arrow", "left square bracket",
                 "Right square bracket", "V", "Delete", "Left curly brace", "Right curly brace", "Star", "Pigtail"]
         #todo load the database
-        data = []
-        labels = []
+        d = pickle.load(open('./onedol_ds.pkl', 'rb'))
+        data = d['dataset']
+        labels = d['labels']
 
         label = -1
         all_gesture = False
         for gesture, label_index in zip(data, labels):
             if label_index != label:
-                # todo 3 add the template in the gallery
+                self.add_template_thumbnail(gesture, name[label_index]) 
 
-                # todo 4 add the template to the one_dollar_recognizer
+                self.oneDollar.addTemplate(gesture, name[label_index]) 
 
                 if not all_gesture:
                     label = label_index
@@ -107,7 +105,6 @@ class MainWindow(QMainWindow):
 
         #todo 3 create and add the corresponding item in the gallery
         self.gallery.addItem(QListWidgetItem(icon, str(label)))
-
 
 
     #######################
