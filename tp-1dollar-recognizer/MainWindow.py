@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from gdrawer import GDrawer
 from Canvas import Canvas
-from onedollar import OneDollar
 
 import pickle
 
@@ -47,9 +46,6 @@ class MainWindow(QMainWindow):
         v_layout.addWidget( self.textEdit )
 
         self.setCentralWidget( self.container )
-
-        self.oneDollar = OneDollar()
-
         ################################
         # TODO 9: connect the signal and the slot
         ###############################
@@ -73,7 +69,7 @@ class MainWindow(QMainWindow):
             if label_index != label:
                 self.add_template_thumbnail(gesture, name[label_index]) 
 
-                self.oneDollar.addTemplate(gesture, name[label_index]) 
+                self.canvas.oneDollar.addTemplate(gesture, name[label_index]) 
 
                 if not all_gesture:
                     label = label_index
