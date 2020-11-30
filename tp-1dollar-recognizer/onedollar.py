@@ -25,9 +25,27 @@ class OneDollar(object):
     #
     #########################################
     def recognize(self, points):
+        b = np.inf
         template_id = -1
         label = "None"
         score = 0
+        i = 0
+
+        points = self.resample(points, numPoints)
+        self.resampled_gesture = points
+        points = self.rotateToZero(points)
+        points = self.scaleToSquare(points)
+        points = self.translateToOrigin(points)
+
+        for t in self.templates:
+            d = self.distanceAtBestAngle(points, t, -self.angle_range, self.angle_range, self.angle_step)
+            if d < b:
+                b = d
+                template_id = i
+                label = self.labels[i]
+            i += 1
+        
+        score = 1 - b / (0.5 * np.sqrt(self.square_size ** 2 + self.square_size ** 2))
         return template_id, label, score
 
 
@@ -59,12 +77,10 @@ class OneDollar(object):
         return min(f_1, f_2)
 
     ####################
-    def distanceAtAngle(self, points, template, angle):
+    def distanceAtAngle(self, points, template, angle):    
         newPoints = self.rotateBy(points, angle)
         d = pathDistance(newPoints, template)
         return d
-
-
 
 
     ####################
@@ -120,7 +136,7 @@ class OneDollar(object):
     def rotateToZero(self, points):
         centroid = np.mean(points, 0)
 
-        teta = np.arctan2(centroid[1] - points[1], centroid[0] - points[0])
+        teta = np.arctan2(centroid[1] - points[0][1], centroid[0] - points[0][0])
         newPoints = self.rotateBy(points, -teta)
 
         return newPoints
@@ -129,11 +145,15 @@ class OneDollar(object):
     # TODO 6
     #########################################
     def rotateBy(self, points, angle):
+        centroid = np.mean(points, 0)
         newPoints = np.zeros((1, 2))    #initialize with a first point [0,0]
 
         #todo 6 update the vector newPoints
         for p in points:
-            pass
+            q = np.array([0., 0.])
+            q[0] = (p[0] - centroid[0]) * np.cos(angle) - (p[1] - centroid[1]) * np.sin(angle) + centroid[0]
+            q[1] = (p[0] - centroid[0]) * np.sin(angle) + (p[1] - centroid[1]) * np.cos(angle) + centroid[1]
+            newPoints = np.append(newPoints, [q], 0)
 
         newPoints = newPoints[1:]       #remove the first point [0,0]
         return newPoints
@@ -143,9 +163,16 @@ class OneDollar(object):
     # TODO 7
     #########################################
     def scaleToSquare(self, points):
+        maxs = np.amax(points, axis=0)
+        mins = np.amin(points, axis=0)
+        boudingBox = [maxs[0] - mins[0], maxs[1] - mins[1]]
         newPoints = np.zeros((1, 2))    #initialize with a first point [0,0]
 
-        #todo 7
+        for p in points:
+            q = np.array([0., 0.])
+            q[0] = p[0] * (self.square_size / boudingBox[0])
+            q[1] = p[1] * (self.square_size / boudingBox[1])
+            newPoints = np.append(newPoints, [q], 0)
 
         newPoints = newPoints[1:]      #remove the first point [0,0]
         return newPoints

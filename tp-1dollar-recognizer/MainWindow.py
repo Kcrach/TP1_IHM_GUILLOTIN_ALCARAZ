@@ -49,9 +49,8 @@ class MainWindow(QMainWindow):
         ################################
         # TODO 9: connect the signal and the slot
         ###############################
-
-
-
+        self.canvas.selected_template.connect(self.set_action_on_gesture)
+            
 
         ################################
         # TODO 3: fill the template gallery
@@ -106,11 +105,10 @@ class MainWindow(QMainWindow):
     #######################
     # TODO 9
     #######################
-    def set_action_on_gesture(self, label, id, score):
+    def set_action_on_gesture(self, label, t_id, score):
         message = "template: " + label + " score: " + str(score)
-        self.textEdit.setPlainText( message+  "\n" + self.textEdit.toPlainText() )
-
-        #todo 9 select the corresponding element in the galery
+        self.textEdit.setPlainText(message+  "\n" + self.textEdit.toPlainText())
+        self.gallery.setCurrentRow(t_id)
 
     ##############
     def open(self):

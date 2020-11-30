@@ -29,7 +29,7 @@ class Canvas(QWidget):
     ##########################
     # TODO 9: create a selected_template signal with three parameters: label, template_id, score
     ##########################
-
+    selected_template = pyqtSignal(str, int, float)
 
     def __init__(self, parent = None):
         QWidget.__init__(self, parent)
@@ -46,7 +46,8 @@ class Canvas(QWidget):
         # TODO 11 create a timer
         # connect the timer to the sole timout
         #############################
-
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timeout)
 
 
 
@@ -83,12 +84,18 @@ class Canvas(QWidget):
         self.animation = True       #used in paintEvent to know whether it displays the traces or the animated feedback
         nb_step = 50
 
-        # TODO 11
-        # self.termination is the template
-        # self.path is the original gesture
-        # self.feedback is the feedback path to animate
-        # Weight should be within [0,1]
-        # self.feedback = interpolate(x1, y1, x2, x2, weight)
+        if self.counter >= nb_step:
+            self.animation = False
+            self.timer.stop()
+
+        for i in range(len(self.path)) :
+            x1 = self.termination[i].x()
+            y1 = self.termination[i].y()
+            x2 = self.path[i].x()
+            y2 = self.path[i].y()
+            weight = self.counter / nb_step
+            feedback = interpolate(x2, y2, x1, y1, weight)
+            self.feedback[i] = QPoint(feedback[0], feedback[1])
 
         self.counter += 1
         self.repaint()
@@ -141,16 +148,17 @@ class Canvas(QWidget):
     def display_feedback(self, template_id):
 
         #todo 10
-        #self.termination = ...
+        self.termination = self.get_feedback(template_id)
 
         #todo 11
-        #self.path = ...
-        #self.feedback = self.path
+        self.path = points_to_qpolygonF(self.oneDollar.resampled_gesture)
+        self.feedback = self.path
 
         #create a timer
         self.counter = 0
-
-
+        self.timer.setInterval(10)
+        self.timer.start()
+        
     ##############################
     def recognize_gesture(self):
         points = qpolygonF_to_points(self.path)
@@ -158,7 +166,7 @@ class Canvas(QWidget):
         print("template id: ", template_id, " label: ", label, " score: ", score)
 
         if score > 0.5:
-            #self.selected_template.emit(label, template_id, score)
+            self.selected_template.emit(label, template_id, score)
             self.display_feedback(template_id)
 
 
